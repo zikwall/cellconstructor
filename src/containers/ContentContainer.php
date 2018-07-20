@@ -13,35 +13,28 @@ class ContentContainer implements ContentContainerInterface
      */
     public $container;
 
-    /**
-     * ContentContainer constructor.
-     */
     public function __construct()
     {
         $this->container = CC::$component->getDb();
     }
 
-    /**
-     * @return MatrixContentContainer
-     */
-    public function getMatrixContentContainer()
+    public function getMatrixContentContainer() : MatrixContentContainer
     {
         return new MatrixContentContainer();
     }
 
-    /**
-     * @return FlatContentContainer
-     */
-    public function getTabularContentContainer()
+    public function getTabularContentContainer() : FlatContentContainer
     {
         return new FlatContentContainer();
     }
 
     /**
-     * @param $templateId
+     * Выборка отчетов для конкретного шаблона
+     *
+     * @param int $templateId идентификатор шаблона
      * @return bool|null|\stdClass
      */
-    public function findTemplateReports($templateId)
+    public function findTemplateReports(int $templateId)
     {
         $query = $this->container->table('reports')
             ->select('reports.*')
@@ -55,11 +48,12 @@ class ContentContainer implements ContentContainerInterface
     }
 
     /**
-     * @param $templateId
-     * @param null $type
+     * Выборка шаблона
+     *
+     * @param int $templateId идентификатор шаблона
      * @return bool|null|\stdClass
      */
-    public function findTemplate($templateId, $type = null)
+    public function findTemplate(int $templateId, int $type = null)
     {
         $query = $this->container->table('templates')
             ->select('templates.*')
@@ -77,9 +71,11 @@ class ContentContainer implements ContentContainerInterface
     }
 
     /**
+     * Выборка шаблонов
+     *
      * @return bool|null|\stdClass
      */
-    public function findTemplates($type = null)
+    public function findTemplates(int $type = null)
     {
         $query = $this->container->table('templates')->select('templates.*');
 
@@ -95,8 +91,10 @@ class ContentContainer implements ContentContainerInterface
     }
 
     /**
-     * @param $reportId
-     * @param bool $isJoinTemplate
+     * Выборка конкретного отчета
+     *
+     * @param $reportId int дентификатор отчета
+     * @param bool $isJoinTemplate флаг - присоеденинять таблицу шаблонов или нет
      * @return bool|null|\stdClass
      */
     public function findReport($reportId, $isJoinTemplate = true)
@@ -118,7 +116,9 @@ class ContentContainer implements ContentContainerInterface
     }
 
     /**
-     * @param bool $isJoinTemplate
+     * Выборка все отчетов
+     *
+     * @param bool $isJoinTemplate флаг - присоеденинять таблицу шаблонов или нет
      * @return bool|null|\stdClass
      */
     public function findReports($isJoinTemplate = true)
@@ -140,14 +140,14 @@ class ContentContainer implements ContentContainerInterface
     }
 
     /**
-     * Метод проверки существоания записи
+     * Метод проверки существоания записи в матрице
      *
-     * @param $columnPath
-     * @param $rowPath
-     * @param $x
-     * @param $y
-     * @param bool $isIdentityCheck
-     * @param bool $isReturnedValue
+     * @param string $columnPath устаревшее в будущем будеи удалено - координаты в виде полных путей в столбце
+     * @param string $rowPath устаревшее в будущем будеи удалено - координаты в виде полных путей в строке
+     * @param int $x идентификатор ячейки строки
+     * @param int $y идентификатор ячейки стобца
+     * @param bool $isIdentityCheck пока что ограничевающий параметр для выборки
+     * @param bool $isReturnedValue возвращать добавленное значение или статус успеха
      * @return bool
      */
     public function checkMatrixRecord($matrixStorangeName, $columnPath, $rowPath, $x, $y, $isIdentityCheck = true, $isReturnedValue = true)
@@ -170,6 +170,10 @@ class ContentContainer implements ContentContainerInterface
                 throw new InvalidParamException('Argument or several arguments are not numeric!');
             }
 
+            /**
+             * toDo: добавить проверку на основе идентифкаторов, а не путей
+             */
+
             $checkRecord->where('xAxis', '=', $x)
                 ->where('yAxis', '=', $y);
         }
@@ -183,20 +187,6 @@ class ContentContainer implements ContentContainerInterface
         }
 
         return false;
-    }
-
-    public function checkMatrixRecord2($matrixStorangeName, $columnPath, $rowPath)
-    {
-        if(!$this->checkTable($matrixStorangeName)){
-            return false;
-        }
-
-        if(!$chekRecord = Core::$app->db2->query("SELECT `value` FROM `".$matrixStorangeName."` "." WHERE `column` = '".$columnPath."' AND `row` = '".$rowPath."';")){
-            return false;
-        }
-        $checkRow = $chekRecord->fetch_object();
-
-        return !empty($checkRow->value) ? $checkRow->value : false;
     }
 
     /**

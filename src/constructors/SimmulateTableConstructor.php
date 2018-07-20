@@ -17,10 +17,11 @@ class SimmulateTableConstructor extends TableConstructor
 {
     /**
      * @param $upHierarchy
-     * @param bool $editTable
+     *      Format: @see ArryalleTrait::arrayTree() result array
+     * @param bool $editTable flag
      * @return Table
      */
-    public function simmulateFlatTable($upHierarchy, $editTable = false)
+    public function simmulateFlatTable(array $upHierarchy, bool $editTable = false)
     {
         if($upHierarchy == null || !is_array($upHierarchy)){
             throw new InvalidParamException();
@@ -50,27 +51,31 @@ class SimmulateTableConstructor extends TableConstructor
         }
 
         $table->tbody()->addRow('contentRow');
-        $lastElementCounts = count($this->getArrayTreeLastLevelElements($upHierarchy));
+        //$lastElementCounts = count($this->getArrayTreeLastLevelElements($upHierarchy));
 
-        for($i = 0; $i <= $lastElementCounts; $i++){
-            foreach ($colNames as $colName => $isLeaf){
-                /**
-                 * toDo: create recursive generated fill downs row
-                 */
-                //$table->tbody()->td('contentRow', trim($colName), '{{content here}}');
-            }
-        }
+        //for($i = 0; $i <= $lastElementCounts; $i++){
+        //foreach ($colNames as $colName => $isLeaf){
+        /**
+         * toDo: create recursive generated fill downs row
+         */
+        //$table->tbody()->td('contentRow', trim($colName), '{{content here}}');
+        //}
+        //}
         $table->addClass('table table-bordered');
         return $table;
     }
 
     /**
      * @param $upHierarchy
+     *      Format: @see ArryalleTrait::arrayTree() result array
+     *
      * @param $leftHierarchy
-     * @param bool $editTable
+     *      Format: @see ArryalleTrait::arrayTree() result array
+     *
+     * @param bool $editTable flag on\off editable mod, this method is a dummy
      * @return Table
      */
-    public function simmulateMatrxiTable($upHierarchy, $leftHierarchy, $editTable = true)
+    public function simmulateMatrxiTable(array $upHierarchy, array $leftHierarchy, $editTable = true) : Table
     {
         $openEndCols = [];
 
@@ -136,12 +141,14 @@ class SimmulateTableConstructor extends TableConstructor
 
     /**
      * @param $upTree
+     *      Format: @see ArryalleTrait::arrayTree() result array
      * @param $leftTree
+     *      Format: @see ArryalleTrait::arrayTree() result array
      * @param null $container
-     * @param bool $isEditable
+     * @param bool $isEditable $editTable flag on\off editable mod, this method is a dummy
      * @return array
      */
-    public function drawEditableCells($upTree, $leftTree, $container = null, $isEditable = true, $isUseContainer = true)
+    public function drawEditableCells(array $upTree, array $leftTree, string $container = null, bool $isEditable = true, bool $isUseContainer = true) : array
     {
         $matrixElementsStorange = [];
         $counterAxis = 0;

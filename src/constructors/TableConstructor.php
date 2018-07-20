@@ -4,6 +4,7 @@ namespace zikwall\cellconstructor\constructors;
 
 use Donquixote\Cellbrush\Table\Table;
 use zikwall\cellconstructor\constructors\interfaces\ConstructorInterface;
+use zikwall\cellconstructor\containers\ContentContainer;
 use zikwall\cellconstructor\helpers\EditableHelper;
 use zikwall\cellconstructor\helpers\Helper;
 use zikwall\cellconstructor\exceptions\InvalidParamException;
@@ -33,31 +34,17 @@ class TableConstructor implements ConstructorInterface
         $this->contentConstructor = new ContentConstructor();
     }
 
-    /**
-     * @return ContentConstructor
-     */
-    public function getContentConstructor()
+    public function getContentConstructor() : ContentConstructor
     {
         return $this->contentConstructor;
     }
 
-    /**
-     * @return \zikwall\cellconstructor\containers\ContentContainer
-     */
-    public function getContentContainer()
+    public function getContentContainer() : ContentContainer
     {
         return $this->getContentConstructor()->getContainer();
     }
 
-    /**
-     * Метод генерирует матричную таблицу, так же опционально Editable поля
-     *
-     * @param $upTree
-     * @param $leftTree
-     * @param bool $isEditable
-     * @return array
-     */
-    public function drawEditableCells($upTree, $leftTree, $container = null, $isEditable = true, $isUseContainer = true)
+    public function drawEditableCells(array $upTree, array $leftTree, string $container = null, bool $isEditable = true, bool $isUseContainer = true) : array
     {
         $matrixElementsStorange = [];
         $counterAxis = 0;
@@ -95,40 +82,13 @@ class TableConstructor implements ConstructorInterface
         return $matrixElementsStorange;
     }
 
-    /**
-     * Создает Editable поле для матричной таблицы на основе типа поля
-     *
-     * @param $column
-     * @param $fullIdentity
-     * @param string $fieldType
-     * @return string
-     */
-    public function drawEditableCell($discoverType, $fullIdentity, $value, $dataParams = [], $container = null)
+    public function drawEditableCell($discoverType, $fullIdentity, $value, $dataParams = [], $container = null) : string
     {
         $type = EditableHelper::determineFieldType($discoverType);
         return $field = EditableHelper::createEditableField($fullIdentity, $type, $value, $container, $dataParams);
     }
 
-    /**
-     * Основной метод генерации матричной таблицы
-     *
-     * @param [] $upHierarchy массив с определениме иерархии шапки таблицы
-     * @param [] $leftHierarchy  массив с опеределнием иерархии боковой шапки
-     *
-     * @param string $container контейнер данных, передается имя таблицы
-     * ```php
-     * $contentContainermMatrixStorange = $this->getContentContainer()
-     *      ->getMatrixContentContainer()
-     *      ->findContainer($container);
-     * ```
-     * @param bool $editTable [] флажок переключения между методами отображения таблицы
-     * состояния:
-     *  1. true - отображать editable mode
-     *  2. false - отображать таблицу с датасетом
-     *
-     * @return Table
-     */
-    public function drawMatrixTable($upHierarchy, $leftHierarchy, $container, $editTable = false, $countainerUse = true)
+    public function drawMatrixTable(array $upHierarchy, array $leftHierarchy, string $container, bool $editTable = false, bool $countainerUse = true) : Table
     {
         $openEndCols = [];
 
@@ -205,94 +165,7 @@ class TableConstructor implements ConstructorInterface
         return $table;
     }
 
-    public function drawScheduleTable($upHierarchy, $leftHierarchy, $editTable = false)
-    {
-        $openEndCols = [];
-
-        if($upHierarchy == null || !is_array($upHierarchy)){
-            throw new InvalidParamException('Вверхняя иерархия пуста или не массив!');
-        }
-
-        if($leftHierarchy == null || !is_array($leftHierarchy)){
-            throw new InvalidParamException('Боковая иерархия пуста или не массив!');
-        }
-
-        $colNames = $this->initUpHierarchy($upHierarchy);
-        $rowHierarchy = $this->initLeftHierarchy($leftHierarchy);
-
-        $table = new Table();
-
-        $rowGroupName = 'g';
-        $rowGroupNames = [$rowGroupName];
-
-        for ($i = 0; $i < EditableHelper::depth($colNames); ++$i) {
-            $table->thead()->addRow($rowGroupName . '.caption');
-            $rowGroupName .= '.g';
-            $rowGroupNames[] = $rowGroupName;
-        }
-        $table->thead()->addRow($rowGroupName);
-
-        for ($i = 0; $i <= EditableHelper::depth($rowHierarchy); $i++) {
-            $openEndCols[] = $i;
-        }
-
-        $table->addColNames($openEndCols);
-        $table->thead()->thOpenEnd('g', 0, 'Дни недели/время/группы');
-
-        foreach ($rowHierarchy as $row => $isLeaf){
-            $table->addRow($row);
-            $table->thOpenEnd($row, $isLeaf['level'], $isLeaf['name']);
-            if($isLeaf['isNullRow'] == 0 || $isLeaf['heading'] == 0){
-                $table->tbody()->addCellClass($row, $isLeaf['level'], 'center maxWidth');
-            }
-        }
-
-        foreach ($colNames as $colName => $isLeaf) {
-            $table->addColName($colName);
-            $depth = substr_count($colName, '.');
-            $rowGroupName = $rowGroupNames[$depth];
-            $rowName = $isLeaf['leaf']
-                ? $rowGroupName
-                : $rowGroupName . '.caption';
-            $table->thead()->th($rowName, $colName, $isLeaf['name'])->addCellClass($rowName, $colName,'center');
-        }
-
-
-        if($editTable){
-            $contentContainermMatrixStorange = $this->drawScheduleCells($upHierarchy, $leftHierarchy, $editTable);
-
-            foreach ($contentContainermMatrixStorange as $matrixContent){
-                /**
-                // example code logic
-                if($model->getDiscipline($day, $couple)->groups() > 1){
-                    //return array names, paths...
-                    $groups = $model->getGroupsForDiscipline($discipline); //exampla: return groups (3 group like on a picture)
-                    // or returned first group and last group
-                    // add mini group cells
-                    $table->thead()->thOpenEnd('minigroup', 0, $discipline->full_description_here)
-                } else { ...
-                 * */
-                $table->tbody()->td($matrixContent['vpath'], $matrixContent['hpath'], $matrixContent['value']);
-                if(!empty($matrixContent['class'])){
-                    $table->addCellClass($matrixContent['vpath'], $matrixContent['hpath'], $matrixContent['class']);
-                }
-            }
-        }
-
-        $table->addClass('table table-bordered table-striped');
-
-        return $table;
-    }
-
-    /**
-     * Метод генерирует плоскую таблицу, в качестве хранилища данных выступает физическая таблица
-     *
-     * @param array $upHierarchy  массив с определениме иерархии шапки таблицы
-     * @param array $determination массив с определениме связи физической таблицы и столбцов сгенерированной матрицы
-     * @param string $tableName имя таблицы, для определения набора данных
-     * @return Table
-     */
-    public function drawFlatTable($upHierarchy, $determination, $tableName)
+    public function drawFlatTable(array $upHierarchy, array $determination, string $tableName) : Table
     {
         $hierarchy = $this->initUpHierarchy($upHierarchy);
 
@@ -350,7 +223,7 @@ class TableConstructor implements ConstructorInterface
      * @param array $rows массив с определениме иерархии боковой шапки
      * @return Table
      */
-    public function drawRowsTable($rows)
+    public function drawRowsTable(array $rows) : Table
     {
         $openEndCols = [];
 
@@ -379,11 +252,7 @@ class TableConstructor implements ConstructorInterface
         return $table;
     }
 
-    /**
-     * @param $upContent
-     * @return array
-     */
-    public function initUpHierarchy($upContent)
+    public function initUpHierarchy(array $upContent) : array
     {
         foreach ($upContent as $els => $el) {
             $this->upHierarchy[trim($el['path'])] = is_array($el['childs'])
@@ -396,12 +265,7 @@ class TableConstructor implements ConstructorInterface
         return $this->upHierarchy;
     }
 
-    /**
-     * @param $leftContent
-     * @param bool $isConstruct
-     * @return array
-     */
-    public function initLeftHierarchy($leftContent, $isConstruct = false)
+    public function initLeftHierarchy(array $leftContent, $isConstruct = false) : array
     {
         foreach ($leftContent as $els => $el) {
             $this->leftHierarchy[trim($el['path'])] = is_array($el['childs'])

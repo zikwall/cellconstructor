@@ -25,10 +25,30 @@ trait ArrayableTrait
      * Так же расчитывает полные "пути" и уровни вложенности
      *
      * @param $dataArray
-     * @param bool $useLevels
-     * @return array|InvalidParamException
+     *      Format:
+     *      [1] => Array(
+     *          [id] => 1
+     *          [name] => F1
+     *          [field_name] => Mazda
+     *          [internal_key] => 0
+     *          [sort_order] => 1
+     *      )
+     * @param bool $useLevels flag подсчитывать уровни или нет
+     *
+     * @return array
+     *      Format:
+     *      [1] => Array(
+     *          [id] => 1
+     *          [name] => F1
+     *          [field_name] => Mazda
+     *          [internal_key] => 0
+     *          [sort_order] => 1
+     *          [orientation] => 1
+     *          [lvl] => 0
+     *          [path] => F1
+     *      )
      */
-    public function getArrays($dataArray, $useLevels = true)
+    public function getArrays(array $dataArray, bool $useLevels = true) : array
     {
         $reformedArray = [];
 
@@ -47,21 +67,27 @@ trait ArrayableTrait
         return $reformedArray;
     }
 
-    /**
-     * @return array
-     */
-    public function getArrayTreeElementsStorange()
+    public function getArrayTreeElementsStorange() : array
     {
         return $this->arrayTreeElementsStorange;
     }
 
     /**
      * Метод возвращает все последние элементы древовидного массива.
-     *
-     * @param $arrayTree
      * @return array
+     *      Format:
+     *      [1] => Array(
+     *          [id] => 1
+     *          [name] => F1
+     *          [field_name] => Mazda
+     *          [internal_key] => 0
+     *          [sort_order] => 1
+     *          [lvl] => 0
+     *          [path] => F1
+     *      )
+     *
      */
-    public function getArrayTreeLastLevelElements($arrayTree)
+    public function getArrayTreeLastLevelElements(array $arrayTree) : array
     {
         if(is_array($arrayTree)){
             foreach ($arrayTree as $items => $item){
@@ -77,12 +103,10 @@ trait ArrayableTrait
 
     /**
      * Данный метод строит те самые "пути" в "деревьях"
-     *
-     * @param $findIdentity
-     * @param $array
      * @return string
+     *      Format: [path] => F3.F10.F7
      */
-    public function arrayPath($findIdentity, $array = [], $keyFields = ['internal_key', 'name'])
+    public function arrayPath(int $findIdentity, array $array = [], $keyFields = ['internal_key', 'name']) : string
     {
         if(!is_numeric($findIdentity)){
             throw new InvalidParamException();
@@ -108,9 +132,29 @@ trait ArrayableTrait
      * Создает новый ключ "childs" и помещает туда всех его "детей"
      *
      * @param $data
-     * @return array|InvalidParamException
+     *
+     * @return array
+     *          Format:
+     *          [1] => Array(
+     *              [id] => 1
+     *              [name] => F1
+     *              [field_name] => Mazda
+     *              [internal_key] => 0
+     *              [sort_order] => 1
+     *              [lvl] => 0
+     *              [path] => F1
+     *              [childs] => Array (
+     *                      [6] => Array (
+     *                          [id] => 6
+     *                          [name] => F6
+     *                          [field_name] => Mazda CX-9
+     *                          [internal_key] => 1
+     *                          [sort_order] => 1
+     *                          [lvl] => 0
+     *                          [path] => F1.F6
+     *                      )...
      */
-    public function arrayTree($data, $keyFields = ['internal_key', 'sort_order', 'childs'])
+    public function arrayTree(array $data, $keyFields = ['internal_key', 'sort_order', 'childs']) : array
     {
         $tree = [];
 

@@ -26,10 +26,7 @@ class ContentConstructor implements ContentConstructorInterface
         $this->contentContainer = new ContentContainer();
     }
 
-    /**
-     * @return ContentContainer
-     */
-    public function getContainer()
+    public function getContainer() : ContentContainer
     {
         return $this->contentContainer;
     }
@@ -37,7 +34,7 @@ class ContentConstructor implements ContentConstructorInterface
     /**
      * @return array commands
      */
-    public function commands()
+    public function commands() : array
     {
         return [];
     }
@@ -49,7 +46,7 @@ class ContentConstructor implements ContentConstructorInterface
      * @param null $db
      * @return bool
      */
-    public function commandCreateTable($creationTableFields, $creationTableName, $isOnlyLastLevelCreation = true, $isUsingTemplateHiararchy = false, $db = null)
+    public function commandCreateTable(array $creationTableFields, string $creationTableName, bool $isOnlyLastLevelCreation = true, bool $isUsingTemplateHiararchy = false, string $db = null) : bool
     {
         if(empty($creationTableName)){
             throw new InvalidParamException('Required attribute: "table name" is missing!');
@@ -160,7 +157,7 @@ class ContentConstructor implements ContentConstructorInterface
          */
 
         /**
-         * toDo: 
+         * toDo:
          *
          * ```php
          *  $this->getContainer()->container->transaction(function (QueryBuilderHandler $db) use ($createTableQueryBuildingString) {
@@ -195,15 +192,14 @@ class ContentConstructor implements ContentConstructorInterface
     }
 
     /**
-     * @param array $y
-     * @param array $x
-     * @param $tableName
+     * @param array $y up array
+     * @param array $x left array
+     * @param $tableName string table name
      * @param bool $isInsert
-     * @param bool $isReturnedInsertIds
-     * @param null $templateName
+     * @param bool $isReturnedInsertIds flag return inserting ids or true/false
      * @return bool|string
      */
-    public function commandCreateMatrixStorange($y = [], $x = [], $tableName, $isInsert = true, $isReturnedInsertIds = false)
+    public function commandCreateMatrixStorange(array $y = [], array $x = [], string $tableName, bool $isInsert = true, bool $isReturnedInsertIds = false)
     {
         if(empty($tableName)){
             $tableName = 'm_report_'.md5('hash');
@@ -411,9 +407,9 @@ class ContentConstructor implements ContentConstructorInterface
      * Данный метод нужен для генерирования "плоских" отчетов на основу одномерных таблиц
      *
      * @param [] $hierarchy
-     * @return string
+     * @return string json array
      */
-    public function createDetermination($hierarchy = [])
+    public function createDetermination(array $hierarchy = [])
     {
         $determinationLink = [];
 
